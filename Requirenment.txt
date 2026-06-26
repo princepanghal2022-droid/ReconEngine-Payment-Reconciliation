@@ -1,0 +1,36 @@
+Intern Project Briefs
+Technical Challenge Specifications for Engineering Interns
+Webhook Payment Verifier + Ledger
+
+Overview
+This project requires building a webhook receiver that verifies incoming payment events, posts them to a ledger, and runs an automated reconciliation job that detects discrepancies between what was expected and what actually arrived.
+
+
+
+
+Core Objective
+Go beyond simple webhook ingestion: implement a scheduled reconciliation process that cross-checks the ledger against an expected-payments table and surfaces anomalies to an admin UI with a suggested action for each.
+
+
+Reconciliation Job Requirements
+The job must run every 60 seconds and detect the following three anomaly types:
+
+Orphaned credits — a payment has been posted to the ledger but no corresponding order exists.
+Stalled orders — an order has been pending beyond an acceptable time window with no webhook arriving.
+Balance mismatch — the stored ledger balance does not equal the sum of all posted entries.
+
+Admin UI Requirements
+Each flagged anomaly must appear with a status label and a suggested corrective action.
+The UI must update to reflect newly resolved anomalies without requiring a manual refresh.
+
+
+--- Table ---
+Deliverable | A running webhook receiver, a reconciliation job covering all three anomaly types, and an admin UI that displays flags with statuses and suggested actions.
+-------------
+
+
+
+--- Table ---
+Why it’s hard | Reconciliation logic requires careful reasoning about payment state machines, timing windows, and what ‘correct’ means when events arrive out of order or late. AI tools produce a simple join query. Getting all three anomaly types right, handling timing windows correctly, and building a genuinely useful admin UI requires the intern to think through the full payment lifecycle.
+-------------
+
