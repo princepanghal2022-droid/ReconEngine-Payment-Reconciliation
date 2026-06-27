@@ -9,6 +9,12 @@ from db import get_db_connection, init_db
 from reconciliation import run_reconciliation
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
+# Initialize database when app is imported by Vercel
+try:
+    init_db()
+    run_reconciliation()
+except Exception as e:
+    print("Startup initialization error:", e)
 
 # Queue system for Server-Sent Events (SSE)
 sse_clients = []
