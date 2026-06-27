@@ -1,1 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReconEngine - Webhook Payment Verifier & Ledger Admin Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="glow-bg"></div>
+    <div class="app-container">
+        <!-- Dashboard Header -->
+        <header class="app-header">
+            <div class="header-logo">
+                <span class="logo-icon">⚡</span>
+                <div class="logo-text">
+                    <h1>ReconEngine</h1>
+                    <p>Webhook Payment Verifier & Ledger Ledger Audit</p>
+                </div>
+            </div>
+            <div class="connection-status" id="connection-status">
+                <span class="status-dot pulsing"></span>
+                <span class="status-label">LIVE SYNC ACTIVE</span>
+            </div>
+        </header>
 
+        <!-- Main Content Grid -->
+        <main class="dashboard-grid">
+            <!-- Left Side: Simulator Controls & Active Anomalies -->
+            <section class="left-column">
+                <!-- Scenario Simulator -->
+                <div class="dashboard-card glass-panel" id="simulator-card">
+                    <div class="card-header">
+                        <h2>Scenario Simulator</h2>
+                        <span class="header-badge">Control Panel</span>
+                    </div>
+                    <p class="card-description">Simulate payment lifecycle events, system timeouts, or ledger corruptions to watch the reconciliation engine act in real time.</p>
+                    <div class="simulation-actions">
+                        <button class="btn btn-primary" id="btn-create-order" onclick="simulateOrder()">
+                            <span class="btn-icon">🛒</span> Create Pending Order
+                        </button>
+                        <button class="btn btn-secondary" id="btn-pay-order" onclick="simulateWebhookValid()">
+                            <span class="btn-icon">✅</span> Simulate Webhook (Paid)
+                        </button>
+                        <button class="btn btn-warning" id="btn-orphaned-credit" onclick="simulateWebhookOrphaned()">
+                            <span class="btn-icon">👻</span> Simulate Webhook (Orphaned)
+                        </button>
+                        <button class="btn btn-danger" id="btn-corrupt-balance" onclick="simulateCorruptBalance()">
+                            <span class="btn-icon">💥</span> Corrupt Ledger Balance
+                        </button>
+                        <button class="btn btn-accent" id="btn-run-recon" onclick="runReconciliationNow()">
+                            <span class="btn-icon">🔄</span> Run Reconciliation Now
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Anomalies Section -->
+                <div class="dashboard-card glass-panel" id="anomalies-card">
+                    <div class="card-header">
+                        <h2>Active & Resolved Anomalies</h2>
+                        <span class="anomaly-count-badge" id="anomaly-count">0 Detected</span>
+                    </div>
+                    <div class="anomaly-list" id="anomaly-list">
+                        <!-- Dynamic list of anomalies will be inserted here -->
+                        <div class="empty-state">
+                            <span class="empty-state-icon">🛡️</span>
+                            <h3>System Healthy</h3>
+                            <p>No active anomalies found. All ledger balances and orders are in perfect alignment.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Side: Database State Visualizer -->
+            <section class="right-column">
+                <div class="dashboard-card glass-panel flex-grow">
+                    <div class="card-header">
+                        <h2>Database State Visualizer</h2>
+                        <!-- Tabs -->
+                        <div class="tab-navigation">
+                            <button class="tab-btn active" onclick="switchTab('orders')">Expected Payments (Orders)</button>
+                            <button class="tab-btn" onclick="switchTab('entries')">Ledger Entries</button>
+                            <button class="tab-btn" onclick="switchTab('balances')">Ledger Balances</button>
+                        </div>
+                    </div>
+
+                    <!-- Tab Contents -->
+                    <div class="tab-content" id="tab-orders">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Amount</th>
+                                        <th>Currency</th>
+                                        <th>Status</th>
+                                        <th>Created At</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-orders-body">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="tab-content hidden" id="tab-entries">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Entry ID</th>
+                                        <th>Order ID</th>
+                                        <th>Account</th>
+                                        <th>Amount</th>
+                                        <th>Direction</th>
+                                        <th>Created At</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-entries-body">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="tab-content hidden" id="tab-balances">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Account ID</th>
+                                        <th>Stored Balance</th>
+                                        <th>Currency</th>
+                                        <th>Last Updated</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-balances-body">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden">
+        <span id="toast-message"></span>
+    </div>
+
+    <!-- Dynamic JS Logic -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
